@@ -2,6 +2,7 @@ package com.example.identity_services.controllers;
 
 import com.example.identity_services.dto.request.ApiResponse;
 import com.example.identity_services.dto.request.UserCreationRequest;
+import com.example.identity_services.dto.response.UserResponse;
 import com.example.identity_services.entities.User;
 import com.example.identity_services.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +30,12 @@ public class UserController {
         return apiResponse;
     }
     @GetMapping
-    public ResponseEntity<List<User>> getUsers() {
+    public ResponseEntity<List<UserResponse>> getUsers() {
         return ResponseEntity.ok(userService.getUsers());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable String id) {
+    public ResponseEntity<UserResponse> getUser(@PathVariable String id) {
         return ResponseEntity.ok(userService.getUser(id));
     }
 
@@ -45,7 +46,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody UserCreationRequest request) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable String id, @RequestBody UserCreationRequest request) {
         return ResponseEntity.ok(userService.updateUser(id, request));
     }
 }
