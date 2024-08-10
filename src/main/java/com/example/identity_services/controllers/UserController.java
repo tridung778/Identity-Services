@@ -1,9 +1,11 @@
 package com.example.identity_services.controllers;
 
+import com.example.identity_services.dto.request.ApiResponse;
 import com.example.identity_services.dto.request.UserCreationRequest;
 import com.example.identity_services.entities.User;
 import com.example.identity_services.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +19,14 @@ public class UserController {
     private UserService userService;
 
     @PostMapping()
-    public ResponseEntity<User> createRequest(@RequestBody @Validated UserCreationRequest request) {
-        return ResponseEntity.ok(userService.createRequest(request));
+    public ApiResponse<User> createRequest(@RequestBody @Validated UserCreationRequest request) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+
+        apiResponse.setCode(HttpStatus.OK.value());
+        apiResponse.setMessage("User created successfully");
+        apiResponse.setResult(userService.createRequest(request));
+
+        return apiResponse;
     }
     @GetMapping
     public ResponseEntity<List<User>> getUsers() {
