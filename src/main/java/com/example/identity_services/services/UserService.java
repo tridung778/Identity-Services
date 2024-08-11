@@ -3,6 +3,7 @@ package com.example.identity_services.services;
 import com.example.identity_services.dto.request.UserCreationRequest;
 import com.example.identity_services.dto.response.UserResponse;
 import com.example.identity_services.entities.User;
+import com.example.identity_services.enums.Role;
 import com.example.identity_services.mapper.UserMapper;
 import com.example.identity_services.repositories.UserRepository;
 import lombok.AccessLevel;
@@ -21,8 +22,8 @@ import java.util.List;
 public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
 
-    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
     public User createRequest(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -30,6 +31,7 @@ public class UserService {
         }
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(Role.USER);
         return userRepository.save(user);
     }
 

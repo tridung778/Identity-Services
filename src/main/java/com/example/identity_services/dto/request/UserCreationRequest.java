@@ -1,5 +1,6 @@
 package com.example.identity_services.dto.request;
 
+import com.example.identity_services.enums.Role;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -19,4 +20,5 @@ public class UserCreationRequest {
     String firstname;
     String lastname;
     LocalDate dob;
+    Role role;
 }

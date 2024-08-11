@@ -4,6 +4,7 @@ import com.example.identity_services.dto.request.AuthenticationRequest;
 import com.example.identity_services.dto.request.IntrospectRequest;
 import com.example.identity_services.dto.response.AuthenticationResponse;
 import com.example.identity_services.dto.response.IntrospectResponse;
+import com.example.identity_services.entities.User;
 import com.example.identity_services.repositories.UserRepository;
 import com.nimbusds.jose.*;
 
@@ -15,8 +16,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,9 +28,9 @@ import java.util.Date;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class AuthenticationService {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
     UserRepository userRepository;
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -68,7 +68,7 @@ public class AuthenticationService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        var token = generateToken(request.getUsername());
+        var token = generateToken(user);
 
         return AuthenticationResponse.builder()
                 .token(token)
@@ -77,15 +77,15 @@ public class AuthenticationService {
 
     }
 
-    String generateToken(String username) {
+    String generateToken(User user) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject(username)
+                .subject(user.getUsername())
                 .issuer("localhost")
                 .issueTime(new Date())
                 .expirationTime(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
-                .claim("roles", "user")
+                .claim("scope", user.getRole())
                 .build();
 
         Payload payload = new Payload(claimsSet.toJSONObject());

@@ -6,10 +6,11 @@ import com.example.identity_services.dto.response.UserResponse;
 import com.example.identity_services.entities.User;
 import com.example.identity_services.services.UserService;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +18,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class UserController {
-    @Autowired
-    private UserService userService;
+
+    UserService userService;
 
     @PostMapping()
     public ApiResponse<User> createRequest(@RequestBody @Validated UserCreationRequest request) {
@@ -34,12 +38,15 @@ public class UserController {
 
     @GetMapping
     public ApiResponse<List<UserResponse>> getUsers() {
-        ApiResponse<List<UserResponse>> apiResponse = new ApiResponse<>();
 
-        apiResponse.setCode(HttpStatus.OK.value());
-        apiResponse.setMessage("Get users successfully");
-        apiResponse.setResult(userService.getUsers());
-        return apiResponse;
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info(authentication.getName());
+
+        return ApiResponse.<List<UserResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Get users successfully")
+                .result(userService.getUsers())
+                .build();
     }
 
     @GetMapping("/{id}")

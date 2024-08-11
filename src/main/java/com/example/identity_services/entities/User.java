@@ -1,5 +1,6 @@
 package com.example.identity_services.entities;
 
+import com.example.identity_services.enums.Role;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,5 +25,5 @@ public class User {
     String firstname;
     String lastname;
     LocalDate dob;
-
+    Role role;
 }

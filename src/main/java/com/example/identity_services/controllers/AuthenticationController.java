@@ -32,16 +32,6 @@ public class AuthenticationController {
                 .build();
     }
 
-    @PostMapping("/login")
-    ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        var result = authenticationService.authenticate(request);
-        return ApiResponse.<AuthenticationResponse>builder()
-                .code(HttpStatus.OK.value())
-                .message(result.isAuthenticated() ? "User authenticated successfully" : "User authentication failed")
-                .result(result)
-                .build();
-    }
-
     @PostMapping("/introspect")
     ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) {
         var result = authenticationService.introspect(request);
