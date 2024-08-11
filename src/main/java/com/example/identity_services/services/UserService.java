@@ -9,6 +9,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,11 +22,14 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
 
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+
     public User createRequest(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username already exists");
         }
         User user = userMapper.toUser(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         return userRepository.save(user);
     }
 
