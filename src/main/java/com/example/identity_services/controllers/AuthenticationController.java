@@ -2,7 +2,9 @@ package com.example.identity_services.controllers;
 
 import com.example.identity_services.dto.request.ApiResponse;
 import com.example.identity_services.dto.request.AuthenticationRequest;
+import com.example.identity_services.dto.request.IntrospectRequest;
 import com.example.identity_services.dto.response.AuthenticationResponse;
+import com.example.identity_services.dto.response.IntrospectResponse;
 import com.example.identity_services.services.AuthenticationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +24,21 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        boolean result = authenticationService.authenticate(request);
+        var result = authenticationService.authenticate(request);
         return ApiResponse.<AuthenticationResponse>builder()
                 .code(HttpStatus.OK.value())
-                .message(result ? "User authenticated successfully" : "User authentication failed")
-                .result(AuthenticationResponse.builder()
-                        .isAuthenticated(result)
-                        .build())
+                .message(result.isAuthenticated() ? "User authenticated successfully" : "User authentication failed")
+                .result(result)
+                .build();
+    }
+
+    @PostMapping("/introspect")
+    ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) {
+        var result = authenticationService.introspect(request);
+        return ApiResponse.<IntrospectResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message(result.isValid() ? "Token is valid" : "Token is invalid")
+                .result(result)
                 .build();
     }
 }

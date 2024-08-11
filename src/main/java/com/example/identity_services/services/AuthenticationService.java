@@ -1,24 +1,104 @@
 package com.example.identity_services.services;
 
 import com.example.identity_services.dto.request.AuthenticationRequest;
+import com.example.identity_services.dto.request.IntrospectRequest;
+import com.example.identity_services.dto.response.AuthenticationResponse;
+import com.example.identity_services.dto.response.IntrospectResponse;
 import com.example.identity_services.repositories.UserRepository;
+import com.nimbusds.jose.*;
+
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.text.ParseException;
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
     UserRepository userRepository;
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
-    public boolean authenticate(AuthenticationRequest username) {
-        var user = userRepository.findByUsername(username.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
-        return passwordEncoder.matches(username.getPassword(), user.getPassword());
+    @NonFinal
+    @Value("${jwt.signerKey}")
+    protected String SIGNER_KEY;
+
+    public IntrospectResponse introspect(IntrospectRequest request) {
+        var token = request.getToken();
+
+        try {
+            JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+            SignedJWT signedJWT = SignedJWT.parse(token);
+
+            Date expiration = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+            var verify = signedJWT.verify(verifier);
+            return IntrospectResponse.builder()
+                    .valid(verify && expiration.after(new Date()))
+                    .build();
+
+        } catch (JOSEException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        var user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
+
+        if (!authenticated) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        var token = generateToken(request.getUsername());
+
+        return AuthenticationResponse.builder()
+                .token(token)
+                .isAuthenticated(true)
+                .build();
+
+    }
+
+    String generateToken(String username) {
+        JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
+
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .subject(username)
+                .issuer("localhost")
+                .issueTime(new Date())
+                .expirationTime(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
+                .claim("roles", "user")
+                .build();
+
+        Payload payload = new Payload(claimsSet.toJSONObject());
+
+        JWSObject jwsObject = new JWSObject(jwsHeader, payload);
+
+        try {
+            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+
+            return jwsObject.serialize();
+        } catch (JOSEException e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }
