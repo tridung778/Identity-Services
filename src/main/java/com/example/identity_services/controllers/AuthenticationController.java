@@ -22,6 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
     AuthenticationService authenticationService;
 
+    @PostMapping("/token")
+    ApiResponse<AuthenticationResponse> generateToken(@RequestBody AuthenticationRequest request) {
+        var result = authenticationService.authenticate(request);
+        return ApiResponse.<AuthenticationResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message(result.isAuthenticated() ? "User authenticated successfully" : "User authentication failed")
+                .result(result)
+                .build();
+    }
+
     @PostMapping("/login")
     ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         var result = authenticationService.authenticate(request);
