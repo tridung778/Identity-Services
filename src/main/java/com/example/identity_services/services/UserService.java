@@ -4,6 +4,8 @@ import com.example.identity_services.dto.request.UserCreationRequest;
 import com.example.identity_services.dto.response.UserResponse;
 import com.example.identity_services.entities.User;
 import com.example.identity_services.enums.Role;
+import com.example.identity_services.exceptions.AppException;
+import com.example.identity_services.exceptions.ErrorCode;
 import com.example.identity_services.mapper.UserMapper;
 import com.example.identity_services.repositories.UserRepository;
 import lombok.AccessLevel;
@@ -30,7 +32,7 @@ public class UserService {
 
     public User createRequest(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new AppException(ErrorCode.USER_EXISTED);
         }
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -46,7 +48,7 @@ public class UserService {
     @PostAuthorize("returnObject.username == authentication.name")
     public UserResponse getUser(String id) {
         return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(()
-                -> new RuntimeException("User not found")));
+                -> new AppException(ErrorCode.USER_NOT_EXISTED)));
     }
 
     public void deleteUser(String id) {
@@ -56,12 +58,12 @@ public class UserService {
     public UserResponse getMyInfo(){
         var contextHolder = SecurityContextHolder.getContext();
         String name = contextHolder.getAuthentication().getName();
-        User user = userRepository.findByUsername(name).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return userMapper.toUserResponse(user);
     }
 
     public UserResponse updateUser(String id, UserCreationRequest request) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         userMapper.updateUser(user, request);
         return userMapper.toUserResponse(userRepository.save(user));
     }

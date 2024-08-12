@@ -5,6 +5,8 @@ import com.example.identity_services.dto.request.IntrospectRequest;
 import com.example.identity_services.dto.response.AuthenticationResponse;
 import com.example.identity_services.dto.response.IntrospectResponse;
 import com.example.identity_services.entities.User;
+import com.example.identity_services.exceptions.AppException;
+import com.example.identity_services.exceptions.ErrorCode;
 import com.example.identity_services.repositories.UserRepository;
 import com.nimbusds.jose.*;
 
@@ -60,12 +62,12 @@ public class AuthenticationService {
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) {
-            throw new RuntimeException("Invalid credentials");
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
         var token = generateToken(user);
@@ -98,7 +100,7 @@ public class AuthenticationService {
             return jwsObject.serialize();
         } catch (JOSEException e) {
             log.error(e.getMessage());
-            throw new RuntimeException(e);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
     }
 }
