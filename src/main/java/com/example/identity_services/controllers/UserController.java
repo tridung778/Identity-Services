@@ -59,6 +59,15 @@ public class UserController {
         return apiResponse;
     }
 
+    @GetMapping("/myInfo")
+    public ApiResponse<UserResponse> getMyInfo() {
+        return ApiResponse.<UserResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Get info successfully")
+                .result(userService.getMyInfo())
+                .build();
+    }
+
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteUser(@PathVariable String id) {
 
