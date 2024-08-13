@@ -1,7 +1,7 @@
 package com.example.identity_services.configuration;
 
+import com.example.identity_services.entities.Role;
 import com.example.identity_services.entities.User;
-import com.example.identity_services.enums.Role;
 import com.example.identity_services.repositories.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class ApplicationInitConfig {
                 userRepository.save(User.builder()
                         .username("admin")
                         .password(passwordEncoder.encode("admin"))
-                        .role(Role.ADMIN)
+//                        .role(new Role())
                         .build());
                 log.info("Admin user created");
             }

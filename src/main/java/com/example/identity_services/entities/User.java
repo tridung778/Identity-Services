@@ -1,10 +1,6 @@
 package com.example.identity_services.entities;
 
-import com.example.identity_services.enums.Role;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -25,5 +21,6 @@ public class User {
     String firstname;
     String lastname;
     LocalDate dob;
+    @OneToOne
     Role role;
 }

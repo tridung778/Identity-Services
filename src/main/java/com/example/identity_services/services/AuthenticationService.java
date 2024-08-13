@@ -86,7 +86,7 @@ public class AuthenticationService {
                 .subject(user.getUsername())
                 .issuer("localhost")
                 .issueTime(new Date())
-                .expirationTime(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
+                .expirationTime(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .claim("scope", user.getRole())
                 .build();
 
