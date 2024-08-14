@@ -7,6 +7,7 @@ import com.example.identity_services.enums.Role;
 import com.example.identity_services.exceptions.AppException;
 import com.example.identity_services.exceptions.ErrorCode;
 import com.example.identity_services.mapper.UserMapper;
+import com.example.identity_services.repositories.RoleRepository;
 import com.example.identity_services.repositories.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
     UserRepository userRepository;
+    RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
@@ -40,7 +42,8 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('READ_DATA')")
     public List<UserResponse> getUsers() {
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
@@ -55,7 +58,7 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public UserResponse getMyInfo(){
+    public UserResponse getMyInfo() {
         var contextHolder = SecurityContextHolder.getContext();
         String name = contextHolder.getAuthentication().getName();
         User user = userRepository.findByUsername(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -65,6 +68,10 @@ public class UserService {
     public UserResponse updateUser(String id, UserCreationRequest request) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         userMapper.updateUser(user, request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        var role = roleRepository.findById(request.getRole().toString());
+        user.setRole(role.get());
         return userMapper.toUserResponse(userRepository.save(user));
     }
 }

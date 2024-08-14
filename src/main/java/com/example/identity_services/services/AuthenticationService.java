@@ -4,6 +4,7 @@ import com.example.identity_services.dto.request.AuthenticationRequest;
 import com.example.identity_services.dto.request.IntrospectRequest;
 import com.example.identity_services.dto.response.AuthenticationResponse;
 import com.example.identity_services.dto.response.IntrospectResponse;
+import com.example.identity_services.entities.Role;
 import com.example.identity_services.entities.User;
 import com.example.identity_services.exceptions.AppException;
 import com.example.identity_services.exceptions.ErrorCode;
@@ -23,9 +24,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Date;
+import java.util.StringJoiner;
 
 @Service
 @RequiredArgsConstructor
@@ -87,7 +91,7 @@ public class AuthenticationService {
                 .issuer("localhost")
                 .issueTime(new Date())
                 .expirationTime(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
-                .claim("scope", user.getRole())
+                .claim("scope", buildScope(user.getRole()))
                 .build();
 
         Payload payload = new Payload(claimsSet.toJSONObject());
@@ -102,5 +106,15 @@ public class AuthenticationService {
             log.error(e.getMessage());
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
+    }
+
+    String buildScope(Role role) {
+        StringJoiner stringJoiner = new StringJoiner(" ");
+
+        stringJoiner.add("ROLE_" + role.getName());
+        if (!CollectionUtils.isEmpty(role.getPermissions())) {
+            role.getPermissions().forEach(permission -> stringJoiner.add(permission.getName()));
+        }
+        return stringJoiner.toString();
     }
 }
