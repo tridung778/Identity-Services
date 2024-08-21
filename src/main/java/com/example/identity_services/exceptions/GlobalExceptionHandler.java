@@ -1,6 +1,6 @@
 package com.example.identity_services.exceptions;
 
-import com.example.identity_services.dto.request.ApiResponse;
+import com.example.identity_services.dto.response.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
 package com.example.identity_services.controllers;
 
-import com.example.identity_services.dto.request.ApiResponse;
 import com.example.identity_services.dto.request.UserCreationRequest;
+import com.example.identity_services.dto.response.ApiResponse;
 import com.example.identity_services.dto.response.UserResponse;
 import com.example.identity_services.entities.User;
 import com.example.identity_services.services.UserService;
