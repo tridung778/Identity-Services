@@ -3,6 +3,7 @@ package com.example.identity_services.controllers;
 import com.example.identity_services.dto.request.AuthenticationRequest;
 import com.example.identity_services.dto.request.IntrospectRequest;
 import com.example.identity_services.dto.request.LogoutRequest;
+import com.example.identity_services.dto.request.RefreshRequest;
 import com.example.identity_services.dto.response.ApiResponse;
 import com.example.identity_services.dto.response.AuthenticationResponse;
 import com.example.identity_services.dto.response.IntrospectResponse;
@@ -50,6 +51,15 @@ public class AuthenticationController {
     ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
         authenticationService.logout(request);
         return ApiResponse.<Void>builder()
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    ApiResponse<AuthenticationResponse> refreshToken(@RequestBody RefreshRequest request) throws ParseException, JOSEException {
+        var result = authenticationService.refreshToken(request);
+        return ApiResponse.<AuthenticationResponse>builder()
+                .code(HttpStatus.OK.value())
+                .result(result)
                 .build();
     }
 

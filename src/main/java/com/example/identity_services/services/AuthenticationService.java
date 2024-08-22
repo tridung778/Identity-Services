@@ -3,6 +3,7 @@ package com.example.identity_services.services;
 import com.example.identity_services.dto.request.AuthenticationRequest;
 import com.example.identity_services.dto.request.IntrospectRequest;
 import com.example.identity_services.dto.request.LogoutRequest;
+import com.example.identity_services.dto.request.RefreshRequest;
 import com.example.identity_services.dto.response.AuthenticationResponse;
 import com.example.identity_services.dto.response.IntrospectResponse;
 import com.example.identity_services.entities.InvalidatedToken;
@@ -82,7 +83,14 @@ public class AuthenticationService {
     String generateToken(User user) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().subject(user.getUsername()).issuer("localhost").issueTime(new Date()).expirationTime(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)).jwtID(UUID.randomUUID().toString()).claim("scope", buildScope(user.getRole())).build();
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getUsername())
+                .issuer("localhost")
+                .issueTime(new Date())
+                .expirationTime(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+                .jwtID(UUID.randomUUID().toString())
+                .claim("scope", buildScope(user.getRole()))
+                .build();
 
         Payload payload = new Payload(claimsSet.toJSONObject());
 
@@ -108,6 +116,25 @@ public class AuthenticationService {
                 .build();
         invalidatedTokenRepository.save(invalidatedToken);
 
+    }
+
+    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+        var jit = signToken.getJWTClaimsSet().getJWTID();
+        var expiration = signToken.getJWTClaimsSet().getExpirationTime();
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiration)
+                .build();
+        invalidatedTokenRepository.save(invalidatedToken);
+        var username = signToken.getJWTClaimsSet().getSubject();
+        var user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+        var token = generateToken(user);
+
+        return AuthenticationResponse.builder()
+                .token(token)
+                .isAuthenticated(true)
+                .build();
     }
 
     SignedJWT verifyToken(String token) throws JOSEException, ParseException {
