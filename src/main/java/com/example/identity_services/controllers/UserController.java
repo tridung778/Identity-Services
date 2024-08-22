@@ -3,7 +3,6 @@ package com.example.identity_services.controllers;
 import com.example.identity_services.dto.request.UserCreationRequest;
 import com.example.identity_services.dto.response.ApiResponse;
 import com.example.identity_services.dto.response.UserResponse;
-import com.example.identity_services.entities.User;
 import com.example.identity_services.services.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +25,11 @@ public class UserController {
     UserService userService;
 
     @PostMapping()
-    public ApiResponse<User> createRequest(@RequestBody @Validated UserCreationRequest request) {
-        return ApiResponse.<User>builder()
-                .result(userService.createRequest(request))
+    public ApiResponse<UserResponse> createUser(@RequestBody @Validated UserCreationRequest request) {
+        log.info("Controller: create user");
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.createUser(request))
+                .code(HttpStatus.OK.value())
                 .build();
     }
 
