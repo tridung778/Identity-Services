@@ -16,9 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @SpringBootTest
 @Slf4j
@@ -88,6 +90,30 @@ public class UserServiceTest {
         });
 
         Assertions.assertEquals(exception.getErrorCode(), ErrorCode.USER_EXISTED);
+
+    }
+
+    @Test
+    @WithMockUser(username = "test")
+    void getMyInfo_valid_success() {
+        Mockito.when(userRepository.findByUsername(ArgumentMatchers.any())).thenReturn(Optional.of(user));
+
+        var response = userService.getMyInfo();
+
+        Assertions.assertEquals(response, userResponse);
+
+    }
+
+    @Test
+    @WithMockUser(username = "test")
+    void getMyInfo_userNotExist_fail() {
+        Mockito.when(userRepository.findByUsername(ArgumentMatchers.any())).thenReturn(Optional.empty());
+
+        var exception = Assertions.assertThrows(AppException.class, () -> {
+            userService.getMyInfo();
+        });
+
+        Assertions.assertEquals(exception.getErrorCode(), ErrorCode.USER_NOT_EXISTED);
 
     }
 
