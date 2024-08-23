@@ -1,12 +1,8 @@
 package com.example.identity_services.services;
 
-import com.example.identity_services.dto.request.UserCreationRequest;
-import com.example.identity_services.dto.response.UserResponse;
-import com.example.identity_services.entities.User;
-import com.example.identity_services.exceptions.AppException;
-import com.example.identity_services.exceptions.ErrorCode;
-import com.example.identity_services.repositories.UserRepository;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDate;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,8 +15,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 
-import java.time.LocalDate;
-import java.util.Optional;
+import com.example.identity_services.dto.request.UserCreationRequest;
+import com.example.identity_services.dto.response.UserResponse;
+import com.example.identity_services.entities.User;
+import com.example.identity_services.exceptions.AppException;
+import com.example.identity_services.exceptions.ErrorCode;
+import com.example.identity_services.repositories.UserRepository;
+
+import lombok.extern.slf4j.Slf4j;
 
 @SpringBootTest
 @Slf4j
@@ -67,7 +69,6 @@ public class UserServiceTest {
                 .build();
     }
 
-
     @Test
     void createUser_validRequest_success() {
         Mockito.when(userRepository.existsByUsername(ArgumentMatchers.any())).thenReturn(false);
@@ -90,7 +91,6 @@ public class UserServiceTest {
         });
 
         Assertions.assertEquals(exception.getErrorCode(), ErrorCode.USER_EXISTED);
-
     }
 
     @Test
@@ -101,7 +101,6 @@ public class UserServiceTest {
         var response = userService.getMyInfo();
 
         Assertions.assertEquals(response, userResponse);
-
     }
 
     @Test
@@ -114,7 +113,5 @@ public class UserServiceTest {
         });
 
         Assertions.assertEquals(exception.getErrorCode(), ErrorCode.USER_NOT_EXISTED);
-
     }
-
 }

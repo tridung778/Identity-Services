@@ -1,5 +1,13 @@
 package com.example.identity_services.services;
 
+import java.util.List;
+
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.example.identity_services.dto.request.UserCreationRequest;
 import com.example.identity_services.dto.response.UserResponse;
 import com.example.identity_services.entities.User;
@@ -8,17 +16,11 @@ import com.example.identity_services.exceptions.ErrorCode;
 import com.example.identity_services.mapper.UserMapper;
 import com.example.identity_services.repositories.RoleRepository;
 import com.example.identity_services.repositories.UserRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +32,6 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
-
     public UserResponse createUser(UserCreationRequest request) {
         log.info("Service: create user");
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -38,7 +39,7 @@ public class UserService {
         }
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-//        user.setRole(Role.USER);
+        //        user.setRole(Role.USER);
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
@@ -50,8 +51,8 @@ public class UserService {
 
     @PostAuthorize("returnObject.username == authentication.name")
     public UserResponse getUser(String id) {
-        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(()
-                -> new AppException(ErrorCode.USER_NOT_EXISTED)));
+        return userMapper.toUserResponse(
+                userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
     }
 
     public void deleteUser(String id) {

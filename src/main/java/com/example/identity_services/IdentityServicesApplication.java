@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class IdentityServicesApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(IdentityServicesApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(IdentityServicesApplication.class, args);
+    }
 }
