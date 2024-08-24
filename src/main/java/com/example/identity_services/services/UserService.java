@@ -1,26 +1,26 @@
 package com.example.identity_services.services;
 
-import java.util.List;
-
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.example.identity_services.dto.request.UserCreationRequest;
 import com.example.identity_services.dto.response.UserResponse;
+import com.example.identity_services.entities.Role;
 import com.example.identity_services.entities.User;
 import com.example.identity_services.exceptions.AppException;
 import com.example.identity_services.exceptions.ErrorCode;
 import com.example.identity_services.mapper.UserMapper;
 import com.example.identity_services.repositories.RoleRepository;
 import com.example.identity_services.repositories.UserRepository;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,13 +34,19 @@ public class UserService {
 
     public UserResponse createUser(UserCreationRequest request) {
         log.info("Service: create user");
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new AppException(ErrorCode.USER_EXISTED);
-        }
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        //        user.setRole(Role.USER);
-        return userMapper.toUserResponse(userRepository.save(user));
+
+        user.setRole(new Role("USER", null, null));
+
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            log.info(e.getMessage());
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+
+        return userMapper.toUserResponse(user);
     }
 
     //    @PreAuthorize("hasRole('ADMIN')")
