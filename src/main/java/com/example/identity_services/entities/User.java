@@ -1,10 +1,11 @@
 package com.example.identity_services.entities;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
 
 @Entity
 @Data
@@ -19,6 +20,7 @@ public class User {
 
     @Column(unique = true)
     String username;
+
     String password;
     String firstname;
     String lastname;

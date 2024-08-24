@@ -1,5 +1,14 @@
 package com.example.identity_services.services;
 
+import java.util.List;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.example.identity_services.dto.request.UserCreationRequest;
 import com.example.identity_services.dto.response.UserResponse;
 import com.example.identity_services.entities.Role;
@@ -9,18 +18,11 @@ import com.example.identity_services.exceptions.ErrorCode;
 import com.example.identity_services.mapper.UserMapper;
 import com.example.identity_services.repositories.RoleRepository;
 import com.example.identity_services.repositories.UserRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

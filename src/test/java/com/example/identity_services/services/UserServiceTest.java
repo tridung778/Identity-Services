@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 
@@ -84,7 +85,8 @@ public class UserServiceTest {
 
     @Test
     void createUser_userExisted_fail() {
-        Mockito.when(userRepository.existsByUsername(ArgumentMatchers.any())).thenReturn(true);
+        Mockito.when(userRepository.save(ArgumentMatchers.any(User.class)))
+                .thenThrow(new DataIntegrityViolationException("Data integrity violation"));
 
         var exception = Assertions.assertThrows(AppException.class, () -> {
             userService.createUser(userCreationRequest);
