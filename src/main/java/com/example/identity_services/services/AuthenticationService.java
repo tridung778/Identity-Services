@@ -76,6 +76,7 @@ public class AuthenticationService {
     //spotless:on
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        log.info("Signer key: {}", SIGNER_KEY);
         var user = userRepository
                 .findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
