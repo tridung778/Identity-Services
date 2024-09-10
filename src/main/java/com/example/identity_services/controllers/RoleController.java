@@ -1,19 +1,17 @@
 package com.example.identity_services.controllers;
 
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-
 import com.example.identity_services.dto.request.RoleRequest;
 import com.example.identity_services.dto.response.ApiResponse;
 import com.example.identity_services.dto.response.RoleResponse;
 import com.example.identity_services.services.RoleService;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/roles")
@@ -26,6 +24,7 @@ public class RoleController {
     @PostMapping
     public ApiResponse<RoleResponse> create(@RequestBody RoleRequest request) {
         return ApiResponse.<RoleResponse>builder()
+
                 .code(HttpStatus.OK.value())
                 .message("Role created successfully")
                 .result(roleService.create(request))
