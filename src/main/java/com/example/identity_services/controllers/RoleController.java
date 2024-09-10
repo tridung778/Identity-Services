@@ -42,11 +42,15 @@ public class RoleController {
     @DeleteMapping("/{roleName}")
     public ApiResponse<Void> delete(@PathVariable("roleName") String roleName) {
         roleService.delete(roleName);
-        
+
 
         return ApiResponse.<Void>builder()
                 .code(HttpStatus.OK.value())
+
+
                 .message("Role deleted successfully")
+                
+
                 .build();
     }
 }
